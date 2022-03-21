@@ -17,22 +17,37 @@ reroutine.Go(stop, func() {
 })
 ```
 
-### Advanced
+### Full
 The following example illustrates how a go-routine can panic and restart to continue its process of incrementing `i`. In this case, the go-routine closes the stop channel when its incremented `i` three times, and panics on every iteration.
 ```go
-c
+// Create a counter. Once this gets to 3 we want to stop restarting. Until then, we want to
+// panic on every increment to prove that we're restarting the go-routine through panics and
+// continuing the work.
 i := int64(0)
 
 reroutine.Go(stop, func() {
     for {
+		// Increment until we get to 3, then stop restarting
         if atomic.AddInt64(&i, 1) == 3 {
             close(stop)
         }
+		
+		// Panic on every iteration
         panic("panicked")
     }
 })
 
+// Make sure that the incrementation was performed
 if atomic.LoadInt64(&i) != 3 {
     panic("expected three iterations")
 }
+```
+
+### Blocking Restart
+Sometimes it might be useful to block until the panicking go-routine is able to successfully complete.
+```go
+stop := make(chan struct{})
+reroutine.BlockingGo(stop, func() {
+	// Do something that we should wait for
+})
 ```
