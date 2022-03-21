@@ -1,10 +1,3 @@
-// Copyright (C) 2022 Print Tracker, LLC - All Rights Reserved
-//
-// Unauthorized copying of this file, via any medium is strictly prohibited
-// as this source code is proprietary and confidential. Dissemination of this
-// information or reproduction of this material is strictly forbidden unless
-// prior written permission is obtained from Print Tracker, LLC.
-
 package reroutine
 
 import (
@@ -17,41 +10,64 @@ import (
 
 func TestGo(t *testing.T) {
 	t.Run("Stop channel", func(t *testing.T) {
-		stop := make(chan struct{})
-		i := int32(0)
-		BlockingGo(stop, func() {
-			for {
-				if atomic.AddInt32(&i, 1) == 3 {
-					close(stop)
+		t.Run("Blocking", func(t *testing.T) {
+			stop := make(chan struct{})
+			i := int32(0)
+			BlockingGo(stop, func() {
+				for {
+					if atomic.AddInt32(&i, 1) == 3 {
+						close(stop)
+					}
+					panic("panicked")
 				}
-				panic("panicked")
+			})
+			if atomic.LoadInt32(&i) != 3 {
+				t.Error("expected three iterations")
 			}
 		})
-		if atomic.LoadInt32(&i) != 3 {
-			t.Error("expected three iterations")
-		}
+		t.Run("Async", func(t *testing.T) {
+			stop := make(chan struct{})
+			var wg sync.WaitGroup
+			wg.Add(1)
+			Go(stop, func() {
+				wg.Done()
+			})
+			wg.Wait()
+		})
 	})
 
 	t.Run("Tomb", func(t *testing.T) {
-		ts := mockTomb{}
-		ts.Go(func() error {
-			<-ts.Dying()
-			return nil
-		})
+		t.Run("Blocking", func(t *testing.T) {
+			ts := mockTomb{}
+			ts.Go(func() error {
+				<-ts.Dying()
+				return nil
+			})
 
-		i := int32(0)
-		BlockingGoTomb(&ts, func() error {
-			for {
-				if atomic.AddInt32(&i, 1) == 3 {
-					ts.Kill(nil)
+			i := int32(0)
+			BlockingGoTomb(&ts, func() error {
+				for {
+					if atomic.AddInt32(&i, 1) == 3 {
+						ts.Kill(nil)
+					}
+					panic("panicked")
 				}
-				panic("panicked")
+				return nil
+			})
+			if atomic.LoadInt32(&i) != 3 {
+				t.Error("expected three iterations")
 			}
-			return nil
 		})
-		if atomic.LoadInt32(&i) != 3 {
-			t.Error("expected three iterations")
-		}
+		t.Run("Async", func(t *testing.T) {
+			var ts mockTomb
+			var wg sync.WaitGroup
+			wg.Add(1)
+			GoTomb(&ts, func() error {
+				wg.Done()
+				return nil
+			})
+			wg.Wait()
+		})
 	})
 }
 

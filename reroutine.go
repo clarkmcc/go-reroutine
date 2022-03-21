@@ -1,10 +1,3 @@
-// Copyright (C) 2022 Print Tracker, LLC - All Rights Reserved
-//
-// Unauthorized copying of this file, via any medium is strictly prohibited
-// as this source code is proprietary and confidential. Dissemination of this
-// information or reproduction of this material is strictly forbidden unless
-// prior written permission is obtained from Print Tracker, LLC.
-
 package reroutine
 
 // Go starts the function do in a go-routine and restarts it only if it panics
