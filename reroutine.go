@@ -7,35 +7,36 @@
 
 package reroutine
 
-import (
-	"context"
-)
-
 // Go starts the function do in a go-routine and restarts it only if it panics
-// until the context is cancelled. If the go-routine returns without panic, then
-// it is not restarted.
-func Go(ctx context.Context, do func(ctx context.Context)) {
-	go BlockingGo(ctx, do)
+// until the stop channel is closed. If the go-routine returns without panic,
+// then it is not restarted. This function returns immediately.
+func Go(stopChan <-chan struct{}, do func()) {
+	go BlockingGo(stopChan, do)
 }
 
 // BlockingGo is the same as Go but does not return until the provided function
 // returns without panicking or the context is cancelled.
-func BlockingGo(ctx context.Context, do func(ctx context.Context)) {
+func BlockingGo(stopChan <-chan struct{}, do func()) {
 	start := make(chan struct{})
 	go func() {
 		start <- struct{}{}
 	}()
-	for _ = range start {
-		if err := ctx.Err(); err != nil {
+	for {
+		select {
+		case <-stopChan:
 			return
+		case _, ok := <-start:
+			if !ok {
+				return
+			}
+			go func() {
+				defer HandleCrash(func(_ interface{}) {
+					start <- struct{}{}
+				})
+				do()
+				close(start)
+			}()
 		}
-		go func() {
-			defer HandleCrash(func(_ interface{}) {
-				start <- struct{}{}
-			})
-			do(ctx)
-			close(start)
-		}()
 	}
 }
 

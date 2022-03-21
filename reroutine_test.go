@@ -8,7 +8,6 @@
 package reroutine
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"sync"
@@ -17,13 +16,13 @@ import (
 )
 
 func TestGo(t *testing.T) {
-	t.Run("Context", func(t *testing.T) {
-		ctx, cancel := context.WithCancel(context.Background())
+	t.Run("Stop channel", func(t *testing.T) {
+		stop := make(chan struct{})
 		i := int32(0)
-		BlockingGo(ctx, func(ctx context.Context) {
+		BlockingGo(stop, func() {
 			for {
 				if atomic.AddInt32(&i, 1) == 3 {
-					cancel()
+					close(stop)
 				}
 				panic("panicked")
 			}
