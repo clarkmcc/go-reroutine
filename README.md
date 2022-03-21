@@ -1,8 +1,8 @@
-# go-reroutine
+# Reroutine
 
 [![codecov](https://codecov.io/gh/clarkmcc/go-reroutine/branch/master/graph/badge.svg?token=aTphaWyObN)](https://codecov.io/gh/clarkmcc/go-reroutine)
 
-Easily keep go-routines alive through panics.
+Easily restart go-routines when they panic. This package provides an easy way to restart a go-routine when it panics but to ignore a restart if it returned normally. It behaves identically to `go func()` but re-calls the provided function if the function panicked. This is useful for long-running worker routines that don't maintain their own state.
 
 ## Installation
     go get github.com/clarkmcc/go-reroutine
