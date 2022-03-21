@@ -1,4 +1,7 @@
 # go-reroutine
+
+[![codecov](https://codecov.io/gh/clarkmcc/go-reroutine/branch/master/graph/badge.svg?token=aTphaWyObN)](https://codecov.io/gh/clarkmcc/go-reroutine)
+
 Easily keep go-routines alive through panics.
 
 ## Installation
