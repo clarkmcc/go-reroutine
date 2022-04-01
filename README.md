@@ -4,6 +4,9 @@
 
 Easily restart go-routines when they panic. This package provides an easy way to restart a go-routine when it panics but to ignore a restart if it returned normally. It behaves identically to `go func()` but re-calls the provided function if the function panicked. This is useful for long-running worker routines that don't maintain their own state.
 
+## Use cases
+This library is not a replacement for proper error handling, nor is it a replacement for a service lifecycle manager like Kubernetes or Nomad. This package was specifically designed to keep long-running scheduler and worker go-routines running in uncontrolled and unmanaged edge/IoT environments.
+
 ## Installation
     go get github.com/clarkmcc/go-reroutine
 
