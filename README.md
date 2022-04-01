@@ -13,7 +13,7 @@ Calling `reroutine.Go` behaves exactly like calling a function inside a regular 
 ```go
 stop := make(chan struct{})
 reroutine.Go(stop, func() {
-	// Do something here that could panic and should be resumed on panic
+  // Do something here that could panic and should be resumed on panic
 })
 ```
 
@@ -26,20 +26,20 @@ The following example illustrates how a go-routine can panic and restart to cont
 i := int64(0)
 
 reroutine.Go(stop, func() {
-    for {
-		// Increment until we get to 3, then stop restarting
-        if atomic.AddInt64(&i, 1) == 3 {
-            close(stop)
-        }
-		
-		// Panic on every iteration
-        panic("panicked")
+  for {
+    // Increment until we get to 3, then stop restarting
+    if atomic.AddInt64(&i, 1) == 3 {
+      close(stop)
     }
+		
+    // Panic on every iteration
+    panic("panicked")
+  }
 })
 
 // Make sure that the incrementation was performed
 if atomic.LoadInt64(&i) != 3 {
-    panic("expected three iterations")
+  panic("expected three iterations")
 }
 ```
 
@@ -48,6 +48,6 @@ Sometimes it might be useful to block until the panicking go-routine is able to 
 ```go
 stop := make(chan struct{})
 reroutine.BlockingGo(stop, func() {
-	// Do something that we should wait for
+  // Do something that we should wait for
 })
 ```
